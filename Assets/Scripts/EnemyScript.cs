@@ -16,51 +16,36 @@ public class EnemyScript : MonoBehaviour {
 	void OnEnable()
 	{
 		wayPointCounter = 0;
-		endPos = new Vector3(3.6f, 1.77f, -3.20f);
+		endPos = new Vector3(2.8f, 1.54f, -3.40f);
 		health = maxHealth;
 	}
 	void Start () 
 	{
-		endPos = new Vector3(3.6f, 1.77f, -3.20f);
-	}
-	public void targeted(bool t)
-	{
-		target = t;
+		endPos = new Vector3(2.8f, 1.54f, -3.40f);
 	}
 	public void ApplyDamage(float damage)
 	{
-		Debug.Log("DAMAGE WORKED");
 		health-=damage;
 	}
 	void Update () 
 	{
-		if(target)
-			renderer.material = enemyTarget;
-		else
-			renderer.material = enemy;
 		if(health <=0)
 			gameObject.SetActive(false);
-//		var fwd = transform.TransformDirection (Vector3.forward);
-//		RaycastHit hit;
-//		if (Physics.Raycast (transform.position, fwd, 10)) {
-//			print (hit.point.ToString());
-//
-//		}
-//		Debug.DrawRay(transform.position, fwd, Color.green);
 
 		transform.position = Vector3.MoveTowards(transform.position, endPos, Time.deltaTime * speed);
+
 		if(wayPointCounter == 0){
 			if(transform.position == endPos)
 			{
 				wayPointCounter++;
-				endPos = new Vector3(3.6f, 1.77f, 1.20f);
+				endPos = new Vector3(2.8f, 1.54f, 1.36f);
 			}
 		}
 		if(wayPointCounter == 1){
 			if(transform.position == endPos)
 			{
 				wayPointCounter++;
-				endPos = new Vector3(14.5f, 1.77f, 1.20f);
+				endPos = new Vector3(14.45f, 1.54f, 1.36f);
 			}
 		}
 		if(wayPointCounter == 2){
