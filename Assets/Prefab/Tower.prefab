@@ -32,7 +32,7 @@ GameObject:
   - 65: {fileID: 6500002}
   m_Layer: 0
   m_Name: Tower
-  m_TagString: Tower
+  m_TagString: t
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -229,8 +229,6 @@ MonoBehaviour:
   RotationSpeed: 5
   muzzleFlash: {fileID: 100000}
   objectToLockOnto: {fileID: 0}
-  enemyTarget: {fileID: 2100000, guid: 8890da414e0f93e4dab09ca9e049b4b0, type: 2}
-  enemy: {fileID: 2100000, guid: e94fc6e4947fbb84c859148dcab1be05, type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

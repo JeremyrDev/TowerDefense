@@ -9,6 +9,11 @@ TagManager:
   - Ground
   - SpawnTower
   - SpawnEnemy
+  - SpawnTower2
+  - t
+  - t2
+  - 
+  - 
   - 
   Builtin Layer 0: Default
   Builtin Layer 1: TransparentFX

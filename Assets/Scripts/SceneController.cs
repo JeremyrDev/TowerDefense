@@ -3,23 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 public class SceneController : MonoBehaviour {
 
-//	public GameObject b;
-//	List<GameObject> bullets;
-
-	public GameObject o;
-	List<GameObject> objects;
+	public GameObject e;
+	List<GameObject> enemies;
 
 	public GameObject t;
 	List<GameObject> towers;
 
+	public GameObject t2;
+	List<GameObject> towers2;
+
 	GameObject spawnObject;
 
-	Vector3 spawnPosition;
-	
-	//public GameObject tower;
-	public GameObject target;
+	public GameObject pause;
 	public GameObject selectedTower;
 	public GameObject Towers;
+	public GameObject Towers2;
 	public GameObject Enemies;
 
 	float spawnTimer = 0;
@@ -27,9 +25,12 @@ public class SceneController : MonoBehaviour {
 	float fpsTimer = 0;
 
 	public int killCounter = 0;
+	public int se = 0;
 	int numberOfTowers = 5;
+	int numberOfTowers2 = 5;
 	int numberOfEnemies = 20;
 	int activeTowers = 0;
+	int activeTowers2 = 0;
 	int cycleCounter = 0;
 	int objectNumber = 0;
 	int cycleLimit = 15;
@@ -40,10 +41,14 @@ public class SceneController : MonoBehaviour {
 
 	string info;
 
+	Vector3 spawnPosition;
+
 	public GUIStyle infoStyle;
 
 	public Material TowerMat;
 	public Material TowerSelectedMat;
+	public Material TowerMat2;
+	public Material TowerSelectedMat2;
 
 	//If fps drops below thresholds, degrade overall game quality in quality settings
 	void OnGUI()
@@ -53,8 +58,9 @@ public class SceneController : MonoBehaviour {
 
 	void Start () 
 	{
-		objects = new List<GameObject>();
+		enemies = new List<GameObject>();
 		towers = new List<GameObject>();
+		towers2 = new List<GameObject>();
 
 		for(int i = 0; i<numberOfTowers; i++)
 		{
@@ -64,27 +70,46 @@ public class SceneController : MonoBehaviour {
 			obj.transform.SetParent(Towers.transform);
 			towers.Add(obj); 
 		}
+		for(int i = 0; i<numberOfTowers2; i++)
+		{
+			GameObject obj = (GameObject)Instantiate(t2);
+			obj.SetActive(false);
+			obj.name = "Tower"+i;
+			obj.transform.SetParent(Towers2.transform);
+			towers2.Add(obj); 
+		}
 		for(int i = 0; i<numberOfEnemies; i++)
 		{
-			GameObject obj = (GameObject)Instantiate(o);
+			GameObject obj = (GameObject)Instantiate(e);
 			obj.SetActive(false);
 			obj.name = "Enemy"+i;
 			obj.transform.SetParent(Enemies.transform);
-			objects.Add(obj); 
+			enemies.Add(obj); 
 		}
 		spawnObject = t;
 	}
-	public void killed()
-	{
-		killCounter++;
-	}
+
 	void Update () 
 	{
+		if(Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
+		{
+			if(pause.activeSelf)
+			{
+				pause.SetActive(false);
+				Time.timeScale = 1;
+			}
+			else
+			{
+				pause.SetActive(true);
+				Time.timeScale = 0;
+			}
+		}
+
 		fpsCounter++;
 		fpsTimer+=1*Time.deltaTime;
 		if(fpsTimer >= 1)
 		{
-			info = spawnTimer.ToString ("f2")+"\n"+cycleCounter + "\n"+fpsCounter + "\n" + killCounter;
+			info = spawnTimer.ToString ("f2")+"\n"+cycleCounter + "\n"+fpsCounter + "\n" + killCounter+"\n"+se;
 			fpsCounter = 0;
 			fpsTimer = 0;
 		}
@@ -97,7 +122,7 @@ public class SceneController : MonoBehaviour {
 
 			if (Physics.Raycast ( ray.origin, ray.direction, out hit, 1000f )) 
 			{
-				if(hit.collider.tag == "Tower")
+				if(hit.collider.tag == "t" || hit.collider.tag == "t2")
 				{
 					selectedTower = hit.collider.gameObject;
 				}
@@ -106,7 +131,9 @@ public class SceneController : MonoBehaviour {
 					spawnPosition = new Vector3(ray.origin.x, 1.54f, ray.origin.z);
 					if(!gotTower)
 						if(spawnObject == t)
-							spawnTower();
+							spawnTower(0);
+						else if(spawnObject == t2)
+							spawnTower (1);
 						else
 							spawnEnemy();
 					if(activeTowers > 5)
@@ -116,15 +143,22 @@ public class SceneController : MonoBehaviour {
 				}
 				else if(hit.collider.tag == "SpawnEnemy")
 				{
-					spawnObject = o;
+					spawnObject = e;
 				}
 				else if(hit.collider.tag == "SpawnTower")
 				{
 					spawnObject = t;
 				}
+				else if(hit.collider.tag == "SpawnTower2")
+				{
+					spawnObject = t2;
+				}
 				Debug.Log(hit.collider.tag);
 			}
-			selectedTower.renderer.material = TowerSelectedMat;
+			if(selectedTower.tag == "t")
+				selectedTower.renderer.material = TowerSelectedMat;
+			if(selectedTower.tag == "t2")
+				selectedTower.renderer.material = TowerSelectedMat2;
 			spawnPosition = new Vector3(ray.origin.x, 1.54f, ray.origin.z);
 			selectedTower.transform.position = spawnPosition;
 		}
@@ -132,7 +166,11 @@ public class SceneController : MonoBehaviour {
 			spawnClick = false;
 		if(Input.GetMouseButtonUp(1))
 		{
-			selectedTower.renderer.material = TowerMat;
+			spawnObject = null;
+			if(selectedTower.tag == "t")
+				selectedTower.renderer.material = TowerMat;
+			if(selectedTower.tag == "t2")
+				selectedTower.renderer.material = TowerMat2;
 			selectedTower = null;
 			gotTower = false;
 		}
@@ -184,59 +222,93 @@ public class SceneController : MonoBehaviour {
 		int counter = 0;
 		for(int i = 0; i < numberOfEnemies;i++)
 		{
-			if(!objects[i].activeInHierarchy)
+			if(!enemies[i].activeInHierarchy)
 			{
-				if(spawnObject == o && spawnClick)
-					objects[i].transform.position = spawnPosition;
+				if(spawnObject == e && spawnClick)
+					enemies[i].transform.position = spawnPosition;
 				else
-					objects[i].transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
-				objects[i].SetActive(true);
+					enemies[i].transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
+				enemies[i].SetActive(true);
 				return;
 			}
 			counter++;
 			if(counter == numberOfEnemies)
 			{
-				GameObject obj = (GameObject)Instantiate(o);
-				if(spawnObject == o)
-					objects[i].transform.position = spawnPosition;
+				GameObject obj = (GameObject)Instantiate(e);
+				if(spawnObject == e)
+					enemies[i].transform.position = spawnPosition;
 				else
-					objects[i].transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
+					enemies[i].transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
 				obj.SetActive(true);
 				obj.name = "Enemy"+i;
 				obj.transform.SetParent(Enemies.transform);
-				objects.Add(obj);
+				enemies.Add(obj);
 				numberOfEnemies++;
 				return;
 			}
 		}
 	}
-	public void spawnTower()
+	public void spawnTower(int type)
 	{
-		activeTowers = 0;
-		gotTower = true;
-		int counter = 0;
-		for(int i = 0; i < numberOfTowers;i++)
+		spawnObject = null;
+		if(type == 0)
 		{
-			if(!towers[i].activeInHierarchy)
+			activeTowers = 0;
+			gotTower = true;
+			int counter = 0;
+			for(int i = 0; i < numberOfTowers;i++)
 			{
-				activeTowers++;
-				//towers[i].transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
-				selectedTower = towers[i];
-				towers[i].SetActive(true);
-				return;
+				if(!towers[i].activeInHierarchy)
+				{
+					activeTowers++;
+					//towers[i].transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
+					selectedTower = towers[i];
+					towers[i].SetActive(true);
+					return;
+				}
+				counter++;
+				if(counter == numberOfTowers)
+				{
+					GameObject obj = (GameObject)Instantiate(t);
+					//obj.transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
+					obj.SetActive(true);
+					obj.name = "Tower"+numberOfTowers;
+					obj.transform.SetParent(Towers.transform);
+					towers.Add(obj);
+					selectedTower = towers[numberOfTowers];
+					numberOfTowers++;
+					return;
+				}
 			}
-			counter++;
-			if(counter == numberOfTowers)
+		}
+		if(type == 1)
+		{
+			activeTowers2 = 0;
+			gotTower = true;
+			int counter = 0;
+			for(int i = 0; i < numberOfTowers2;i++)
 			{
-				GameObject obj = (GameObject)Instantiate(t);
-				//obj.transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
-				obj.SetActive(true);
-				obj.name = "Tower"+numberOfTowers;
-				obj.transform.SetParent(Towers.transform);
-				towers.Add(obj);
-				selectedTower = towers[numberOfTowers];
-				numberOfTowers++;
-				return;
+				if(!towers2[i].activeInHierarchy)
+				{
+					activeTowers2++;
+					//towers[i].transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
+					selectedTower = towers2[i];
+					towers2[i].SetActive(true);
+					return;
+				}
+				counter++;
+				if(counter == numberOfTowers2)
+				{
+					GameObject obj = (GameObject)Instantiate(t2);
+					//obj.transform.position = new Vector3(-7.2f, 1.54f, -3.40f);
+					obj.SetActive(true);
+					obj.name = "Tower"+numberOfTowers2;
+					obj.transform.SetParent(Towers2.transform);
+					towers2.Add(obj);
+					selectedTower = towers2[numberOfTowers2];
+					numberOfTowers2++;
+					return;
+				}
 			}
 		}
 	}

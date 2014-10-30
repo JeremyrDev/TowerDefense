@@ -72,6 +72,7 @@ public class EnemyScript : MonoBehaviour {
 		if(wayPointCounter == 2){
 			if(transform.position == endPos)
 			{
+				sc.se++;
 				gameObject.SetActive(false);
 			}
 		}
