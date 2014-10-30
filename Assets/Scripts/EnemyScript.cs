@@ -4,23 +4,38 @@ using System.Collections;
 public class EnemyScript : MonoBehaviour {
 
 	Vector3 endPos;
+
+	public float maxHealth = 100;
+	public float health = 100;
 	float speed = 5;
+	float spawnTimer = 0;
+
 	int wayPointCounter = 0;
 
-	public float health = 100;
+
 	public bool target = false;
-	float spawnTimer = 0;
-	public float maxHealth = 100;
+
 	public Material enemy;
 	public Material enemyTarget;
+
+	public GameObject c;
+	public GameObject healthBar;
+
+	SceneController sc;
+	
 	void OnEnable()
 	{
 		wayPointCounter = 0;
 		endPos = new Vector3(2.8f, 1.54f, -3.40f);
+		maxHealth+=10;
 		health = maxHealth;
+		healthBar.transform.localScale = new Vector3(.1f, .14f, .009f);
 	}
 	void Start () 
 	{
+		c = GameObject.Find("Camera");
+		sc = c.GetComponent<SceneController>();
+
 		endPos = new Vector3(2.8f, 1.54f, -3.40f);
 	}
 	public void ApplyDamage(float damage)
@@ -29,8 +44,14 @@ public class EnemyScript : MonoBehaviour {
 	}
 	void Update () 
 	{
-		if(health <=0)
+		float h = health/maxHealth;
+
+		healthBar.transform.localScale = new Vector3(h/10, .14f, .009f);
+
+		if(health <=0){
 			gameObject.SetActive(false);
+			sc.killCounter++;
+		}
 
 		transform.position = Vector3.MoveTowards(transform.position, endPos, Time.deltaTime * speed);
 
